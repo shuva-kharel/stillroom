@@ -1,0 +1,220 @@
+.study-tool-shell {
+  padding: 0 28px 28px;
+  display: grid;
+  gap: 25px;
+}
+.tool-card {
+  border: 1px solid var(--line);
+  padding: 20px;
+  background: var(--surface);
+  border-radius: 6px;
+}
+.tool-card h3 {
+  font-size: 22px;
+  margin: 0;
+}
+.tool-card p {
+  overflow-wrap: anywhere;
+}
+.tool-card .button-row {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.tool-card .button-row button {
+  font-size: 12px;
+}
+.study-tool-shell textarea {
+  min-height: 105px;
+  resize: vertical;
+  width: 100%;
+}
+.study-tool-shell .form-stack {
+  gap: 18px;
+}
+.practice-display {
+  text-align: center;
+  padding: 25px 0;
+}
+.practice-display h2 {
+  font:
+    500 64px "IBM Plex Mono",
+    monospace;
+  margin: 15px 0;
+}
+.weekly-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.quiet-chip {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 7px 12px;
+  font-size: 12px;
+}
+.resolved {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.portable-preview {
+  border-radius: 5px;
+  overflow: hidden;
+  max-height: 290px;
+}
+.portable-preview .timer-display {
+  transform: scale(0.7);
+  transform-origin: center;
+}
+.mini-fallback {
+  position: fixed;
+  z-index: 60;
+  bottom: 28px;
+  right: 28px;
+  width: 310px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 40px #0005;
+  border-radius: 8px;
+  padding: 16px;
+}
+.mini-fallback > small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.mini-timer {
+  padding: 12px;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  display: grid;
+  gap: 9px;
+}
+.mini-timer p {
+  font-size: 12px;
+  margin: 0;
+}
+.mini-digits {
+  font:
+    400 42px "IBM Plex Mono",
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+.mini-timer progress {
+  width: 100%;
+  height: 3px;
+  accent-color: var(--accent);
+}
+.mini-intention {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.command-results {
+  display: grid;
+  max-height: 50vh;
+  overflow: auto;
+  gap: 3px;
+}
+.command-results button {
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text);
+  border-radius: 4px;
+}
+.command-results button[aria-selected="true"] {
+  background: var(--hover);
+  border-color: var(--accent);
+}
+.break-screen {
+  text-align: center;
+  padding: 0 25px 35px;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+.break-screen h2 {
+  font:
+    400 60px "IBM Plex Mono",
+    monospace;
+}
+.breathing-orb {
+  width: 100px;
+  height: 100px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  margin: 25px;
+  animation: breathe 9s ease-in-out infinite;
+}
+@keyframes breathe {
+  50% {
+    transform: scale(1.3);
+    opacity: 0.5;
+  }
+}
+.ownership-banner,
+.update-banner {
+  position: fixed;
+  z-index: 150;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 680px);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 6px 35px #0005;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.privacy-list {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+  padding-left: 20px;
+}
+.form-stack input,
+.form-stack textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+.study-tool-shell .form-grid {
+  align-items: end;
+}
+.study-tool-shell > .select-trigger {
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .study-tool-shell {
+    padding: 0 18px 24px;
+  }
+  .mini-fallback {
+    right: 12px;
+    bottom: 80px;
+    width: min(310px, calc(100vw - 24px));
+  }
+  .tool-card {
+    padding: 15px;
+  }
+  .ownership-banner,
+  .update-banner {
+    bottom: 80px;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .breathing-orb {
+    animation: none;
+  }
+}

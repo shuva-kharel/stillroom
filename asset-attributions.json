@@ -1,0 +1,10 @@
+{
+  "backgrounds": {"source":"src/backgrounds/catalog.ts and src/studio.css","creator":"Original Stillroom SVG/CSS artwork","notes":"Procedural illustrated scenes; no photographs or third-party artwork bundled."},
+  "ambience": {"source":"src/sound/synthesis.ts","creator":"Original Stillroom Web Audio DSP","notes":"Twelve distinct procedural profiles. Environmental profiles are synthesized approximations, not field recordings."},
+  "alarms": {"source":"src/sound/alarms.ts","creator":"Original Stillroom Web Audio synthesis"},
+  "appIcons": {"source":"public/favicon.svg, public/icon-192.png, public/icon-512.png","creator":"Original Stillroom book mark; PNGs rendered from the SVG"},
+  "fonts": [{"name":"DM Sans","package":"@fontsource/dm-sans","license":"SIL Open Font License 1.1"},{"name":"Cormorant Garamond","package":"@fontsource/cormorant-garamond","license":"SIL Open Font License 1.1"},{"name":"IBM Plex Mono","package":"@fontsource/ibm-plex-mono","license":"SIL Open Font License 1.1"}],
+  "uiIcons": {"package":"lucide-react","license":"ISC"},
+  "optionalExternalContent": {"service":"Spotify official embed","notes":"User-enabled external content; not downloaded, bundled, or controlled by the ambient mixer."},
+  "uploads": {"notes":"User-provided files remain in that browser's IndexedDB and are not distributed with the app or included in JSON backups."}
+}
