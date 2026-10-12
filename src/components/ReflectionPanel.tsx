@@ -7,11 +7,15 @@ import { Select } from "./Select";
 export default function ReflectionPanel({
   store,
   setStore,
+  initialSessionId,
 }: {
   store: Store;
   setStore: SetStore;
+  initialSessionId?: string;
 }) {
-  const [selected, select] = useState(store.history.at(-1)?.id ?? "");
+  const [selected, select] = useState(
+    initialSessionId || store.history.at(-1)?.id || "",
+  );
   const session = store.history.find((h) => h.id === selected);
   return (
     <div className="form-stack">
@@ -25,12 +29,10 @@ export default function ReflectionPanel({
             label="Session to reflect on"
             value={selected}
             onChange={select}
-            options={[...store.history]
-              .reverse()
-              .map((h) => ({
-                value: h.id,
-                label: `${h.subjectName} · ${new Date(h.endedAt).toLocaleString()} · ${formatDuration(h.duration)}`,
-              }))}
+            options={[...store.history].reverse().map((h) => ({
+              value: h.id,
+              label: `${h.subjectName} · ${new Date(h.endedAt).toLocaleString()} · ${formatDuration(h.duration)}`,
+            }))}
           />
           {session && (
             <ReflectionEditor
@@ -47,7 +49,7 @@ export default function ReflectionPanel({
     </div>
   );
 }
-function ReflectionEditor({
+export function ReflectionEditor({
   initial,
   practice,
   onSave,
@@ -71,7 +73,7 @@ function ReflectionEditor({
       onChange={() => setSaved(false)}
     >
       <label>
-        What did I finish?
+        What did you complete?
         <textarea
           maxLength={2000}
           value={draft.finished}
@@ -79,7 +81,7 @@ function ReflectionEditor({
         />
       </label>
       <label>
-        What is my next step?
+        Where will you continue?
         <textarea
           maxLength={2000}
           value={draft.next}

@@ -22,6 +22,16 @@ Changing the hosting domain, protocol, or port creates a different browser-stora
 
 ## Using the room
 
+Start immediately with an empty intention, or choose **More → Continue studying** to prepare your last valid subject, unfinished task, mode, duration, and room preset. The preview includes the current saved place. Continue never replaces an active or partially elapsed session; preparing a fresh session leaves it paused until you press Start.
+
+Use **Save place** beside the intention to bookmark a resource, page, question, or timestamp without interrupting the timer. Subject and task are prefilled. **More → Saved places** filters by subject and supports editing, current-resume-point selection, safe HTTP/HTTPS links, and deletion with Undo. Bookmarks whose subjects are deleted appear under Independent study; deleted task links are ignored. There is one selected resume point per subject. These structured bookmarks are separate from accomplishments.
+
+The optional wrap-up now asks **What did you complete?** and **Where will you continue?**, retaining the existing focus rating. Edit the same fields later through **History → Session notes** or the existing Session reflections tool. Next steps appear near the intention when the subject/task matches; expand long notes when needed. Skipping wrap-up never blocks studying or breaks.
+
+Appearance, layout, backgrounds, fonts, and mixer presets remain in customization. The ambience control provides quick mute and master volume (including on mobile). Countdown configuration and lap tools expand only when requested, stay open while in use, and do not automatically close when you start. Focus View still reveals its essential controls on keyboard focus and pointer movement.
+
+Bookmarks and accomplishments are included in personal JSON backups and excluded from shareable room presets. The existing v3 schema gains validated bookmark fields with empty defaults for older data; reflection field names stay unchanged, preserving previous responses. Existing timer state, history, media, and cross-tab ownership remain intact.
+
 - **Timer:** independent countdown with hour/minute/second inputs and presets; optional study accounting, separate from Pomodoro cycles.
 - **Clock:** local or selected timezone, 12/24-hour format, optional date and seconds. A live study timer can keep running behind it.
 - **Pomodoro:** custom durations, cycle frequency, and separate automatic focus/break transitions, off by default.
@@ -68,6 +78,8 @@ All 12 ambience profiles and six non-silent built-in alarms are original Web Aud
 Closing the app prevents it from actively delivering alarms. Device sleep, browser suspension, autoplay restrictions, and notification permission can also prevent immediate alerts; timestamp recovery works when reopened. Spotify controls its own playback availability, may require sign-in, and cannot expose every embedded-player error to this app. Native installation, fullscreen, codecs, and Document PiP vary by browser.
 
 ## Verification and maintenance
+
+JSON import validates the selected file before opening a focused replacement confirmation. Cancel or Escape leaves the room unchanged. Validation errors appear beside the import control. Import restores the timer paused and retains the existing local media library.
 
 ```sh
 npm test                         # timer, migration, study model, backup, audio lifecycle

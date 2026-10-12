@@ -17,6 +17,34 @@ async function select(p: Page, label: string, value: string) {
 }
 const state = (p: Page) =>
   p.evaluate(() => JSON.parse(localStorage.getItem("stillroom.v3")!));
+test("missing media, invalid uploads and denied notifications preserve study data", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(Notification, "permission", { get: () => "denied" });
+    Notification.requestPermission = async () => "denied";
+  });
+  await open(page);
+  await page.getByLabel("Session intention").fill("Keep this intention");
+  await page.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem("stillroom.v3")!);
+    s.preferences.background.type = "upload";
+    s.preferences.background.mediaId = "missing-audit-asset";
+    localStorage.setItem("stillroom.v3", JSON.stringify(s));
+  });
+  await page.reload();
+  await expect(page.locator(".media-fallback-note")).toContainText("solid fallback");
+  await settings(page, "Backgrounds");
+  await page.getByLabel("Upload background", { exact: true }).setInputFiles({
+    name: "invalid.txt", mimeType: "text/plain", buffer: Buffer.from("not an image"),
+  });
+  await expect(page.getByRole("alert")).toBeVisible();
+  await page.getByRole("tab", { name: "Alarms & Notifications", exact: true }).click();
+  await page.getByRole("switch", { name: "Browser notifications", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Allow notifications");
+  await expect(page.getByRole("switch", { name: "Browser notifications", exact: true })).not.toBeChecked();
+  await close(page);
+  await expect(page.getByLabel("Session intention")).toHaveValue("Keep this intention");
+  expect((await state(page)).history).toEqual([]);
+});
 test("active timer survives themes, room presets, bright upload, and companion changes", async ({
   page,
 }) => {
@@ -102,6 +130,7 @@ test("mixer combinations, master mute, alarm preview and completion clean up", a
   expect((await state(page)).history).toHaveLength(0);
   await close(page);
   await page.getByRole("tab", { name: "Timer", exact: true }).click();
+  await page.getByText("Adjust duration", { exact: true }).click();
   await page.getByLabel("Countdown minutes").fill("0");
   await page.getByLabel("Countdown seconds").fill("1");
   await page.getByRole("button", { name: "Set timer", exact: true }).click();

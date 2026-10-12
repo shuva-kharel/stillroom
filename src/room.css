@@ -384,6 +384,101 @@
   color: var(--muted);
   letter-spacing: 0;
 }
+.intention-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.current-task {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text);
+}
+.intention-heading .text-button {
+  min-height: 32px;
+  font-size: 12px;
+}
+.next-step {
+  width: min(380px, 100%);
+}
+.next-step summary {
+  display: flex;
+  gap: 8px;
+  cursor: pointer;
+  align-items: baseline;
+}
+.next-step summary > span:first-child {
+  flex-shrink: 0;
+}
+.next-step .next-step-preview {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.next-step[open] .next-step-preview {
+  display: none;
+}
+.next-step > p {
+  max-height: 160px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.history-reflection {
+  margin-block: 12px;
+}
+.history-reflection summary {
+  cursor: pointer;
+  padding-block: 8px;
+  color: var(--accent);
+}
+.history-reflection .form-stack {
+  margin-block: 12px;
+}
+.bookmark-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  overflow-wrap: anywhere;
+}
+.bookmark-item p {
+  margin-block: 8px;
+}
+.bookmark-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.bookmark-actions .text-button,
+.bookmark-undo .text-button {
+  min-height: 36px;
+}
+.bookmark-actions [aria-pressed="true"] {
+  color: var(--accent);
+}
+.timing-options {
+  width: min(100%, 420px);
+  text-align: center;
+}
+.timing-options > summary {
+  cursor: pointer;
+  color: var(--muted);
+  padding: 8px;
+  font-size: 12px;
+}
+.timing-options > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .intention input {
   width: 100%;
   min-height: 40px;
@@ -550,6 +645,9 @@
 .sound-card-label .eyebrow {
   letter-spacing: 0;
   font-size: 11px;
+}
+.quick-ambience-icon {
+  display: none;
 }
 .sound-state {
   margin-left: 6px;
@@ -1003,6 +1101,20 @@
   .sound-card-label {
     display: none;
   }
+  .quick-ambience {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+  }
+  .quick-ambience > span {
+    display: none;
+  }
+  .quick-ambience-icon {
+    display: block;
+  }
   .sound-toggle {
     width: 44px;
     height: 44px;
@@ -1215,6 +1327,6 @@
     padding: 18px 8px;
   }
   .display-serif .display-digits.many-digits {
-    font-size: calc(39px * var(--timer-scale));
+    font-size: calc(34px * var(--timer-scale));
   }
 }

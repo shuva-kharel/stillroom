@@ -1,4 +1,6 @@
 import { BookOpen, Clock3, Trash2 } from "lucide-react";
+import { ReflectionEditor } from "./ReflectionPanel";
+import { attachReflection } from "../study";
 import type { Store } from "../types";
 import { formatDuration, localDay, timeOnDay } from "../timer";
 import type { SetStore } from "./Companion";
@@ -131,6 +133,16 @@ export function History({
               <div>
                 <strong>{session.subjectName}</strong>
                 <p>{session.intention || "An open study session"}</p>
+                <details className="history-reflection">
+                  <summary>Session notes</summary>
+                  <ReflectionEditor
+                    initial={store.study.reflections[session.id]}
+                    practice={!!session.practice}
+                    onSave={(r) =>
+                      setStore((s) => attachReflection(s, session.id, r))
+                    }
+                  />
+                </details>
                 <span>
                   {session.mode === "practice"
                     ? "Exam practice"

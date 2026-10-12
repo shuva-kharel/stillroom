@@ -26,6 +26,7 @@ import { soundIds } from "../preferences";
 import { mixer } from "../sound/mixer";
 import { alarms } from "../sound/alarms";
 import type { ToolTab } from "./StudyTools";
+const Bookmarks = lazy(() => import("./Bookmarks"));
 const Tools = lazy(() => import("./StudyTools")),
   Capture = lazy(() =>
     import("./StudyTools").then((m) => ({ default: m.CaptureThought })),
@@ -51,17 +52,24 @@ export default function StudyExperience({
   owner: boolean;
 }) {
   const [more, setMore] = useState(false);
+  const [places, setPlaces] = useState<"quick" | "list" | null>(null);
+  useEffect(() => {
+    const open = () => setPlaces("quick");
+    window.addEventListener("stillroom:save-place", open);
+    return () => window.removeEventListener("stillroom:save-place", open);
+  }, []);
   const [tool, setTool] = useState<ToolTab | null>(null),
     [capture, setCapture] = useState(false),
     [palette, setPalette] = useState(false),
-    [wrap, setWrap] = useState(false),
+    [wrap, setWrap] = useState(""),
     [breakDismiss, setBreakDismiss] = useState("");
+  const [reflectionId, setReflectionId] = useState("");
   const count = useRef(store.history.length);
   const timerId = useRef(store.timer.id);
   useEffect(() => {
     if (store.history.length > count.current && owner) {
       const last = store.history.at(-1);
-      if (last && Date.now() - last.endedAt < 2000) setWrap(true);
+      if (last && Date.now() - last.endedAt < 2000) setWrap(last.id);
     }
     count.current = store.history.length;
   }, [store.history, owner]);
@@ -253,6 +261,7 @@ export default function StudyExperience({
     (store.timer.mode === "short" || store.timer.mode === "long") &&
     store.timer.runningSince !== null &&
     breakDismiss !== store.timer.id &&
+    !places &&
     !tool &&
     !capture &&
     !palette &&
@@ -277,6 +286,11 @@ export default function StudyExperience({
               onClick={() => {
                 setStore(resumeStudy);
                 setMore(false);
+                requestAnimationFrame(() =>
+                  document
+                    .querySelector<HTMLButtonElement>(".start-button")
+                    ?.focus(),
+                );
               }}
             >
               <ArrowRight size={18} />
@@ -284,6 +298,15 @@ export default function StudyExperience({
                 <strong>Continue studying</strong>
                 <small>{resumePreview(store)}</small>
               </span>
+            </button>
+            <button
+              onClick={() => {
+                setMore(false);
+                setPlaces("list");
+              }}
+            >
+              <Bookmark size={18} />
+              Saved places
             </button>
             <button
               onClick={() => {
@@ -326,12 +349,28 @@ export default function StudyExperience({
           </div>
         </Modal>
       )}
+      {places &&
+        createPortal(
+          <Suspense fallback={null}>
+            <Bookmarks
+              store={store}
+              setStore={setStore}
+              quick={places === "quick"}
+              onClose={() => setPlaces(null)}
+            />
+          </Suspense>,
+          document.body,
+        )}
       {reflection &&
         document.getElementById("session-next-step") &&
         createPortal(
-          <p className="next-step">
-            <span>Next step</span> {reflection.next}
-          </p>,
+          <details className="next-step">
+            <summary>
+              <span>Next step</span>
+              <span className="next-step-preview">{reflection.next}</span>
+            </summary>
+            <p tabIndex={0}>{reflection.next}</p>
+          </details>,
           document.getElementById("session-next-step")!,
         )}
       {wrap &&
@@ -343,7 +382,8 @@ export default function StudyExperience({
             <button
               className="text-button"
               onClick={() => {
-                setWrap(false);
+                setWrap("");
+                setReflectionId(wrap);
                 setTool("reflections");
               }}
             >
@@ -352,13 +392,13 @@ export default function StudyExperience({
             <button
               className="text-button"
               onClick={() => {
-                setWrap(false);
+                setWrap("");
                 setTool("parking");
               }}
             >
               Review parked thoughts
             </button>
-            <button className="text-button" onClick={() => setWrap(false)}>
+            <button className="text-button" onClick={() => setWrap("")}>
               Skip
             </button>
           </div>,
@@ -372,6 +412,7 @@ export default function StudyExperience({
             now={now}
             act={act}
             initial={tool}
+            reflectionId={reflectionId}
             onClose={() => setTool(null)}
           />
         )}{" "}

@@ -30,6 +30,7 @@ export default function StudyTools({
   act,
   onClose,
   initial = "reviews",
+  reflectionId,
 }: {
   store: Store;
   setStore: SetStore;
@@ -37,6 +38,7 @@ export default function StudyTools({
   act: (a: TimerAction) => void;
   onClose: () => void;
   initial?: ToolTab;
+  reflectionId?: string;
 }) {
   const [tab, setTab] = useState<ToolTab>(initial);
   return (
@@ -76,7 +78,11 @@ export default function StudyTools({
           )}{" "}
           {tab === "weekly" && <Weekly store={store} setStore={setStore} />}{" "}
           {tab === "reflections" && (
-            <Reflections store={store} setStore={setStore} />
+            <Reflections
+              store={store}
+              setStore={setStore}
+              initialSessionId={reflectionId}
+            />
           )}{" "}
           {tab === "parking" && <Parking store={store} setStore={setStore} />}{" "}
           {tab === "share" && <ShareRoom store={store} setStore={setStore} />}{" "}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, Upload } from "lucide-react";
 import type { Store } from "../types";
 import type { SetStore } from "./Companion";
@@ -13,6 +13,7 @@ import { clearMedia } from "../media";
 import { mixer } from "../sound/mixer";
 import { alarms } from "../sound/alarms";
 import { Section } from "./Controls";
+import { Modal } from "./UI";
 export function DataPanel({
   store,
   setStore,
@@ -25,10 +26,24 @@ export function DataPanel({
   toast: (message: string) => void;
 }) {
   const file = useRef<HTMLInputElement>(null);
+  const importButton = useRef<HTMLButtonElement>(null);
+  const importFeedback = useRef<HTMLParagraphElement>(null);
   const [incoming, setIncoming] = useState<Store | null>(null),
+    [importError, setImportError] = useState(""),
+    [reading, setReading] = useState(false),
     [clearing, setClearing] = useState(false),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const cancelImport = () => {
+    setIncoming(null);
+    requestAnimationFrame(() => importButton.current?.focus());
+  };
+  useEffect(() => {
+    if (importError) {
+      importFeedback.current?.focus();
+      importFeedback.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [importError]);
   return (
     <>
       <Section
@@ -73,32 +88,53 @@ export function DataPanel({
             <Download size={15} /> Export JSON
           </button>
           <button
+            ref={importButton}
             className="secondary-button"
+            disabled={reading}
             onClick={() => file.current?.click()}
           >
-            <Upload size={15} /> Import JSON
+            <Upload size={15} /> {reading ? "Reading backup…" : "Import JSON"}
           </button>
         </div>
         <input
           ref={file}
           type="file"
           hidden
+          aria-label="Import JSON backup"
           accept="application/json,.json"
           onChange={async (e) => {
             const f = e.target.files?.[0];
             e.target.value = "";
             setIncoming(null);
             if (!f) return;
+            setReading(true);
+            setImportError("");
             try {
               if (f.size > 10 * 1024 * 1024)
                 throw new Error("Choose a JSON backup smaller than 10 MB.");
-              setIncoming(validateImport(JSON.parse(await f.text())));
-              setError("");
+              const text = (await f.text()).replace(/^\uFEFF/, "");
+              setIncoming(validateImport(JSON.parse(text)));
             } catch (e) {
-              setError((e as Error).message);
+              setImportError(
+                e instanceof SyntaxError
+                  ? "This file is not valid JSON. Choose a Stillroom JSON backup. Your room has not changed."
+                  : `${(e as Error).message} Your room has not changed.`,
+              );
+            } finally {
+              setReading(false);
             }
           }}
         />
+        {importError && (
+          <p
+            ref={importFeedback}
+            tabIndex={-1}
+            className="error-message"
+            role="alert"
+          >
+            {importError}
+          </p>
+        )}
         <p className="field-hint">
           JSON backups include study data and preferences, but omit local media
           files. Missing media falls back safely. Re-upload files on another
@@ -110,40 +146,43 @@ export function DataPanel({
           are imported paused.
         </p>
         {incoming && (
-          <div className="confirmation">
-            <h3>Replace this room?</h3>
-            <p>
-              This validated backup has {incoming.subjects.length} subjects,{" "}
-              {incoming.tasks.length} tasks, and {incoming.history.length}{" "}
-              sessions. Current study data and preferences will be replaced.
-            </p>
-            <div className="dialog-actions">
-              <button
-                className="secondary-button"
-                onClick={() => setIncoming(null)}
-              >
-                Cancel import
-              </button>
-              <button
-                className="primary-button"
-                onClick={() => {
-                  mixer.stopAll();
-                  alarms.stop();
-                  setStore({
-                    ...incoming,
-                    timer: { ...incoming.timer, runningSince: null },
-                    notice: "",
-                  });
-                  toast(
-                    "Backup imported. The timer is paused; local media is retained.",
-                  );
-                  onClose();
-                }}
-              >
-                Replace with backup
-              </button>
+          <Modal title="Replace this room?" onClose={cancelImport}>
+            <div className="form-stack">
+              <p>
+                This validated backup has {incoming.subjects.length} subjects,{" "}
+                {incoming.tasks.length} tasks, and {incoming.history.length}{" "}
+                sessions. Current study data and preferences will be replaced.
+              </p>
+              <p className="field-hint">
+                This does not merge rooms. The imported timer will be paused.
+                Existing uploaded media is retained; media files are not
+                included in JSON backups.
+              </p>
+              <div className="dialog-actions">
+                <button className="secondary-button" onClick={cancelImport}>
+                  Cancel import
+                </button>
+                <button
+                  className="primary-button"
+                  onClick={() => {
+                    mixer.stopAll();
+                    alarms.stop();
+                    setStore({
+                      ...incoming,
+                      timer: { ...incoming.timer, runningSince: null },
+                      notice: "",
+                    });
+                    toast(
+                      "Backup imported. The timer is paused; local media is retained.",
+                    );
+                    onClose();
+                  }}
+                >
+                  Replace with backup
+                </button>
+              </div>
             </div>
-          </div>
+          </Modal>
         )}
       </Section>
       <Section

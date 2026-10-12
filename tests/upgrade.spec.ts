@@ -121,8 +121,8 @@ test("practice, early finish, reflection, weekly snapshots and continue studying
   await page.clock.fastForward(60000);
   await page.getByLabel("Questions completed", { exact: true }).fill("2");
   await page.getByRole("button", { name: "Finish early & reflect" }).click();
-  await page.getByLabel("What did I finish?").fill("Two questions");
-  await page.getByLabel("What is my next step?").fill("Check question three");
+  await page.getByLabel("What did you complete?").fill("Two questions");
+  await page.getByLabel("Where will you continue?").fill("Check question three");
   await choose(page, "How was my focus?", "Focused");
   await page.getByRole("button", { name: "Save reflection" }).click();
   let s = await state(page);

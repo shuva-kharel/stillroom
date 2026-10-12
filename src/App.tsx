@@ -36,6 +36,7 @@ import {
   Timer,
   X,
 } from "lucide-react";
+import { QuickAudio } from "./components/QuickAudio";
 import { StorageStatus } from "./components/StorageStatus";
 import StudyExperience from "./components/StudyExperience";
 import { useRoom } from "./hooks/useRoom";
@@ -574,9 +575,47 @@ export default function App() {
                 ) : (
                   <>
                     <div className="intention">
-                      <label htmlFor="intention">Session intention</label>
+                      {store.timer.taskId &&
+                        store.tasks.some(
+                          (t) =>
+                            t.id === store.timer.taskId &&
+                            t.title !== store.timer.intention,
+                        ) && (
+                          <p
+                            className="current-task"
+                            title={
+                              store.tasks.find(
+                                (t) => t.id === store.timer.taskId,
+                              )?.title
+                            }
+                          >
+                            Task:{" "}
+                            {
+                              store.tasks.find(
+                                (t) => t.id === store.timer.taskId,
+                              )?.title
+                            }
+                          </p>
+                        )}
+                      <div className="intention-heading">
+                        <label htmlFor="intention">
+                          Session intention{" "}
+                          <span aria-hidden="true">(optional)</span>
+                        </label>
+                        <button
+                          className="text-button"
+                          onClick={() =>
+                            window.dispatchEvent(
+                              new Event("stillroom:save-place"),
+                            )
+                          }
+                        >
+                          Save place
+                        </button>
+                      </div>
                       <input
                         id="intention"
+                        aria-label="Session intention"
                         maxLength={500}
                         placeholder="What will you work on?"
                         value={store.timer.intention}
@@ -651,10 +690,16 @@ export default function App() {
                       </div>
                     )}
                     {p.view === "timer" && store.timer.mode !== "practice" && (
-                      <CountdownSetup store={store} setStore={setStore} />
+                      <details className="timing-options">
+                        <summary>Adjust duration</summary>
+                        <CountdownSetup store={store} setStore={setStore} />
+                      </details>
                     )}
                     {p.view === "stopwatch" && (
-                      <LapTools store={store} act={act} />
+                      <details className="timing-options">
+                        <summary>Lap markers</summary>
+                        <LapTools store={store} act={act} />
+                      </details>
                     )}
                   </>
                 )}
@@ -724,20 +769,11 @@ export default function App() {
                 >
                   <Headphones size={19} />
                 </button>
-                <button
-                  className="sound-card-label"
-                  onClick={() => openSettings("sounds")}
-                >
-                  <span className="eyebrow">Ambience</span>
-                  <span>
-                    {mixer.active.length
-                      ? `${mixer.active.length} sounds playing`
-                      : "Sounds off"}{" "}
-                    <span className="sound-state">
-                      {mixer.muted ? "Muted" : mixer.active.length ? "On" : ""}
-                    </span>
-                  </span>
-                </button>
+                <QuickAudio
+                  store={store}
+                  setStore={setStore}
+                  customize={() => openSettings("sounds")}
+                />
                 <div
                   className={`sound-bars ${mixer.active.length && !mixer.muted ? "playing" : ""}`}
                   aria-hidden="true"

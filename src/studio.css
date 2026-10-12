@@ -1878,9 +1878,6 @@
   .upgraded-room .display-serif .display-digits {
     font-size: calc(90px * var(--timer-scale));
   }
-  .upgraded-room .display-serif .display-digits.many-digits {
-    font-size: calc(47px * var(--timer-scale));
-  }
   .display-caption {
     font-size: 17px;
   }

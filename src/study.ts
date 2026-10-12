@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Store } from "./types";
 import { elapsed, freshTimer, localDay } from "./timer";
 import { applyRoom, builtinRooms } from "./roomPresets";
+import { bookmarkSchema, bookmarkText, currentBookmark } from "./bookmarks";
 const text = z.string().max(2000),
   id = z.string().max(100),
   timestamp = z.number().finite().nonnegative();
@@ -51,6 +52,15 @@ export const reviewSchema = z.object({
 });
 export type ReviewItem = z.infer<typeof reviewSchema>;
 export const studySchema = z.object({
+  bookmarks: z
+    .array(bookmarkSchema)
+    .max(100000)
+    .refine(
+      (items) => new Set(items.map((b) => b.id)).size === items.length,
+      "Bookmark IDs must be unique",
+    )
+    .default([]),
+  currentBookmarks: z.record(id, id).default({}),
   last: z
     .object({
       subjectId: id,
@@ -133,12 +143,35 @@ export function weekBounds(now: number, start: 0 | 1) {
   return { start: d.getTime(), end: end.getTime(), key: localDay(d.getTime()) };
 }
 export function resumePreview(s: Store) {
-  if (s.timer.runningSince !== null || elapsed(s.timer, Date.now()) > 0)
-    return "Return to your current session — its time stays intact.";
+  if (s.timer.runningSince !== null || elapsed(s.timer, Date.now()) > 0) {
+    const place = currentBookmark(s, s.timer.subjectId, s.timer.taskId);
+    return `Return to your current session — its time stays intact.${place ? ` Resume point: ${bookmarkText(place)}` : ""}`;
+  }
   const last = s.study.last;
-  if (!last) return `${s.settings.focus} minutes · Independent study`;
+  if (!last) {
+    const place = currentBookmark(s, s.timer.subjectId, s.timer.taskId);
+    return `Your room is ready. Intention is optional.${place ? ` Resume point: ${bookmarkText(place)}` : ""}`;
+  }
   const task = s.tasks.find((t) => t.id === last.taskId && !t.done);
-  return `${s.subjects.find((x) => x.id === last.subjectId)?.name ?? "Independent study"} · ${task?.title || "A fresh intention"} · ${last.mode === "stopwatch" ? "Open ended" : `${Math.round(last.duration / 60000)} minutes`}`;
+  const preferredSubject = task?.subjectId ?? last.subjectId;
+  const subjectId = s.subjects.some((x) => x.id === preferredSubject)
+    ? preferredSubject
+    : "";
+  const room = [...builtinRooms, ...s.preferences.rooms].find(
+    (r) => r.id === last.roomId,
+  );
+  const place = currentBookmark(s, subjectId, task?.id);
+  return [
+    s.subjects.find((x) => x.id === subjectId)?.name ?? "Independent study",
+    task?.title,
+    last.mode === "stopwatch"
+      ? "Stopwatch · open ended"
+      : `${last.mode === "focus" ? "Pomodoro" : "Timer"} · ${Number((last.duration / 60000).toFixed(2))} minutes`,
+    room?.name,
+    place ? `Resume point: ${bookmarkText(place)}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 export function resumeStudy(s: Store): Store {
   if (s.timer.runningSince !== null || elapsed(s.timer, Date.now()) > 0)
@@ -149,7 +182,7 @@ export function resumeStudy(s: Store): Store {
         view:
           s.timer.mode === "stopwatch"
             ? "stopwatch"
-            : s.timer.mode === "countdown"
+            : s.timer.mode === "countdown" || s.timer.mode === "practice"
               ? "timer"
               : "pomodoro",
       },
@@ -161,8 +194,9 @@ export function resumeStudy(s: Store): Store {
   );
   const next = room ? applyRoom(s, room) : s;
   const task = s.tasks.find((t) => t.id === last.taskId && !t.done);
-  const subjectId = s.subjects.some((x) => x.id === last.subjectId)
-    ? last.subjectId
+  const preferredSubject = task?.subjectId ?? last.subjectId;
+  const subjectId = s.subjects.some((x) => x.id === preferredSubject)
+    ? preferredSubject
     : "";
   return {
     ...next,
@@ -180,7 +214,13 @@ export function resumeStudy(s: Store): Store {
       subjectId,
       intention: task?.title || (last.taskId ? "" : last.intention),
       taskId: task?.id ?? "",
-      duration: last.mode === "stopwatch" ? 0 : Math.max(1000, last.duration),
+      duration:
+        last.mode === "stopwatch"
+          ? 0
+          : Math.min(
+              86400000,
+              Math.max(last.mode === "focus" ? 60000 : 1000, last.duration),
+            ),
     },
   };
 }

@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Modal } from "./UI";
+import { StorageStatus } from "./StorageStatus";
 interface InstallEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
 }
 export default function OfflineStatus({ active }: { active: boolean }) {
+  const storage = useContext(StorageStatus);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null),
     [ready, setReady] = useState(false),
     [help, setHelp] = useState(false),
@@ -65,9 +67,11 @@ export default function OfflineStatus({ active }: { active: boolean }) {
           <span>
             A Stillroom update is ready.{" "}
             {active ? "Your session is active; update when you are ready." : ""}
+            {storage.error ? " Saving is unavailable. Export a backup before reloading to update." : ""}
           </span>
           <button
             className="secondary-button"
+            disabled={!!storage.error}
             onClick={() => {
               if (
                 active &&
